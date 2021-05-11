@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MessageCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="messagecollection.xsd">
+
+  <Plugin>
+    <ShortDescription>Bugdroid plugin for bugs in Android applications</ShortDescription>
+    <Details>Plugin to check for a wide variety of security issues in Android applications</Details>
+  </Plugin>
+
+  <Detector class="com.tmh.bugdroid.webview.JavascriptEnabled">
+    <Details>Check for enabled JS in webviews.</Details>
+  </Detector>
+
+  <BugPattern type="WEB_VIEW_JAVASCRIPT_ENABLED">
+    <ShortDescription>Javascript is enabled in webview.</ShortDescription>
+    <LongDescription>setJavascriptEnabled(true) has been identified which can aid attackers in case they can load URLs inside the webview.</LongDescription>
+    <Details>
+<![CDATA[<p>
+    Enabling JavaScript for the WebView means that it is now susceptible to XSS. The page render should be inspected
+    for potential reflected XSS, stored XSS and DOM XSS.<br/>
+<pre>
+WebView myWebView = (WebView) findViewById(R.id.webView);
+WebSettings webSettings = myWebView.getSettings();
+webSettings.setJavaScriptEnabled(true);
+</pre>
+</p>
+<p>
+    <b>Code at risk:</b><br/>
+Enabling JavaScript is not a bad practice. It just means that the backend code need to be audited for potential XSS.
+</p>]]>
+    </Details>
+  </BugPattern>
+
+  <BugCode abbrev="BDJSE">Webview with Javascript enabled.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.webview.FileAccess">
+  	<Details>Check for file access inside webviews.</Details>
+  </Detector>
+
+  <BugPattern type="WEBVIEW_UNIVERSAL_FILE_ACCESS">
+  	<ShortDescription>WebView has enabled file access.</ShortDescription>
+  	<LongDescription>WebView has enabled file access which can lead to theft of data if loadUrl() is attacker controlled. Review further for misconfigurations.</LongDescription>
+  	<Details><![CDATA[Vulnerable webSettings have been identified which can lead to theft of data.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDFA">WebView has enabled file access.</BugCode>
+
+  <Detector class="com.tmh.bugdroid.webview.JavascriptInterface">
+  	<Details>Check for added JS interfaces in webviews.</Details>
+  </Detector>
+
+  <BugPattern type="WEB_VIEW_JAVASCRIPT_INTERFACE_ADDED">
+  	<ShortDescription>JavaScript interfaces are added in webview.</ShortDescription>
+  	<LongDescription>.addJavascriptInteface() has been identified which can aid attackers in case they can load URLs inside the webview.</LongDescription>
+  	<Details><![CDATA[JS interface identified.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDJSI">JS interfaces have been added for the webview.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.files.ExternalFilesDirectory">
+  	<Details>Look for use of external files directory in the code</Details>
+  </Detector>
+
+  <BugPattern type="EXTERNAL_FILES_DIR_USED">
+  	<ShortDescription>Application uses external file directory for storage.</ShortDescription>
+  	<LongDescription>getExternalFilesDirectory() has been identified in code. This location is world readable. Look for any sensitive information.</LongDescription>
+  	<Details><![CDATA[Use of external files directory identified.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDEFD">Application uses external file directory for storage.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.broadcast.RegisteredReceiver">
+  	<Details>The application registered a broadcast receiver without permissions.</Details>
+  </Detector>
+
+  <BugPattern type="RECEIVER_REGISTERED">
+  	<ShortDescription>The application registered a broadcast receiver dynamically.</ShortDescription>
+  	<LongDescription>Broadcast receiver is registered without permissions. Review further for misconfigurations.</LongDescription>
+  	<Details><![CDATA[Use of external .registerReceiver() identified.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDRR">The application registered a broadcast receiver dynamically.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.broadcast.SendBroadcast">
+  	<Details>The application sends a broadcast  without permissions.</Details>
+  </Detector>
+
+  <BugPattern type="BROADCAST_SENT">
+  	<ShortDescription>The application sends a broadcast without permissions.</ShortDescription>
+  	<LongDescription>Broadcast is transmitted without permissions. Review further for information disclosure.</LongDescription>
+  	<Details><![CDATA[Use of external .sendBroadcast() identified.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDBS">The application sends a broadcast without permissions.</BugCode>
+  
+   <Detector class="com.tmh.bugdroid.files.OverwriteFiles">
+  	<Details>The application sends a broadcast  without permissions.</Details>
+   </Detector>
+
+  <BugPattern type="INTERCEPT_FILE_INTENT">
+  	<ShortDescription>The application starts an activity with intent that can be intercepted and tampered.</ShortDescription>
+  	<LongDescription>Activity is started with intent that can be intercepted by any malicious application. Review further for security flaws.</LongDescription>
+  	<Details><![CDATA[Potentially vulnerable use of external .startActivityForResult() identified.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDFI">The application starts an activity with intent that can be intercepted and tampered.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.arbitraryaccess.ContentProviderAccess">
+  	<Details>The application is exposing its content providers.</Details>
+   </Detector>
+
+  <BugPattern type="CONTENT_PROVIDER_ACCESS">
+  	<ShortDescription>The application uses insecure ways to forward or read intents.</ShortDescription>
+  	<LongDescription>Activity uses attacker controlled intent for processing. Review further for insecure implementation.</LongDescription>
+  	<Details><![CDATA[Application uses setResult() with attacker controlled intent.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDCPA">The application uses insecure ways to forward or read intents.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.arbitraryaccess.InstallApk">
+  	<Details>Detector to look for intents with package installation URI.</Details>
+   </Detector>
+
+  <BugPattern type="INSTALL_ARBITRARY_APK">
+  	<ShortDescription>The application can install APKs.</ShortDescription>
+  	<LongDescription>startActivity() is called using "application/vnd.android.package-archive" as MIME type. Review further for misconfigurations.</LongDescription>
+  	<Details><![CDATA[Application uses setType("application/vnd.android.package-archive")]]></Details></BugPattern>
+
+  <BugCode abbrev="BDIA">The application can install APKs.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.arbitraryaccess.SharedPrefs">
+  	<Details>Detector to check for insecure shared preferences reading.</Details>
+   </Detector>
+
+  <BugPattern type="SHARED_PREFS_READ">
+  	<ShortDescription>The application allows arbitrary reading of shared preferences.</ShortDescription>
+  	<LongDescription>Application reads SharedPreferences with user input. Review further for misconfigurations. </LongDescription>
+  	<Details><![CDATA[Application calls SharedPreferences.getString() with user input.]]></Details></BugPattern>
+
+  <BugCode abbrev="BDSPR">The application allows arbitrary reading of shared preferences.</BugCode>
+</MessageCollection>
