@@ -9,6 +9,7 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.INVOKEINTERFACE;
 import org.apache.bcel.generic.INVOKESTATIC;
+import org.apache.bcel.generic.INVOKEVIRTUAL;
 import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InvokeInstruction;
@@ -56,9 +57,12 @@ public class SharedPrefs implements Detector {
     }
 
     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException, ClassNotFoundException {
-    	if (!classContext.getJavaClass().toString().contains("com.tmh.vulnwebview.SupportWebView")) {
+    	//if (classContext.getJavaClass().toString().contains("android") || classContext.getJavaClass().toString().contains("kotlin") || classContext.getJavaClass().toString().contains("java")) {
+    	//	return;
+    	//}
+    	if (!classContext.getJavaClass().toString().contains("com.tmh")) {
     		return;
-    	} 
+    	}
     	System.out.println("Now inside parent method: " + m);
     	this.originalMethod = m;
         MethodGen methodGen = classContext.getMethodGen(m);
@@ -80,7 +84,7 @@ public class SharedPrefs implements Detector {
                 	LDC loadConst = ByteCode.getPrevInstruction(location.getHandle(), LDC.class);
                     if (loadConst != null) {
                         bugReporter.reportBug(new BugInstance(this, SHARED_PREFS_READ, Priorities.LOW_PRIORITY) 
-                        .addClass(this.originalJc).addMethod(this.originalJc, this.originalMethod)); 
+                        .addClass(this.originalJc).addMethod(classContext.getJavaClass(), this.originalMethod)); 
                     }
                 }
             } else if (inst instanceof INVOKESTATIC) {
@@ -91,7 +95,17 @@ public class SharedPrefs implements Detector {
                     if (!className.startsWith("android") && !className.startsWith("kotlin")) {
 		                JavaClass clazz = Repository.lookupClass(className);
 		                isSharedPrefsMethod(invoke.getMethodName(cpg), clazz);
-                    	}
+                    }
+                }
+            } else if (inst instanceof INVOKEVIRTUAL) {
+            	InvokeInstruction invoke = (InvokeInstruction) inst;
+            	if (invoke.getClassName(cpg) != null) {
+                    String className = invoke.getClassName(cpg);
+                    className.replace("/", ".");
+                    if (!className.startsWith("android") && !className.startsWith("kotlin")) {
+		                JavaClass clazz = Repository.lookupClass(className);
+		                isSharedPrefsMethod(invoke.getMethodName(cpg), clazz);
+                    }
                 }
             }
         }
@@ -130,7 +144,7 @@ public class SharedPrefs implements Detector {
 	                	if (invoke.getClassName(cpg) != null) {
 	                        String className = invoke.getClassName(cpg);
 	                       	className.replace("/", ".");
-	                       	if (!className.startsWith("android") && !className.startsWith("kotlin")) {
+	                       	if (!className.startsWith("android") && !className.startsWith("kotlin") && !className.startsWith("java")) {
 	    		               	JavaClass cl = Repository.lookupClass(className);
 	    		               	isSharedPrefsMethod(invoke.getMethodName(cpg), cl);
 	                       	}     

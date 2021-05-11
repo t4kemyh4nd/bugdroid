@@ -7,6 +7,7 @@ import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.INVOKEINTERFACE;
 import org.apache.bcel.generic.INVOKESTATIC;
 import org.apache.bcel.generic.INVOKEVIRTUAL;
 import org.apache.bcel.generic.Instruction;
@@ -27,14 +28,16 @@ import edu.umd.cs.findbugs.ba.ClassContext;
 import edu.umd.cs.findbugs.ba.DataflowAnalysisException;
 import edu.umd.cs.findbugs.ba.Location;
 
-public class InstallApk implements Detector {
+public class CodeExecution implements Detector {
 
-    private static final String INSTALL_ARBITRARY_APK = "INSTALL_ARBITRARY_APK";
+    private static final String CREATES_UNSAFE_PACKAGE_CONTEXT = "CREATES_UNSAFE_PACKAGE_CONTEXT";
     private BugReporter bugReporter;
     private JavaClass originalJc;
     private Method originalMethod;
+	private boolean isContextCreated;
+	private boolean isClassLoadCalled;
 
-    public InstallApk(BugReporter bugReporter) {
+    public CodeExecution(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
     }
 
@@ -49,14 +52,19 @@ public class InstallApk implements Detector {
             } catch (CFGBuilderException e) {
             } catch (DataflowAnalysisException e) {
             } catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
         }
     }
 
     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException, ClassNotFoundException {
-    	this.originalMethod = m;
+    	if (!classContext.getJavaClass().toString().contains("com.tmh")) {
+    		return;
+    	}
+    	boolean isContextCreated = false;
+        boolean isClassLoadCalled = false;
+        
+        this.originalMethod = m;
         MethodGen methodGen = classContext.getMethodGen(m);
         ConstantPoolGen cpg = classContext.getConstantPoolGen();
         CFG cfg = classContext.getCFG(m);
@@ -71,13 +79,17 @@ public class InstallApk implements Detector {
             
             if (inst instanceof INVOKEVIRTUAL) {
                 InvokeInstruction invoke = (InvokeInstruction) inst;
-                
-                if ("setDataAndType".equals(invoke.getMethodName(cpg)) || "setType".equals(invoke.getMethodName(cpg))) {
-                	LDC loadConst = ByteCode.getPrevInstruction(location.getHandle(), LDC.class);
-                    if (loadConst != null) {
-                        if ("application/vnd.android.package-archive".equals(loadConst.getValue(cpg))){                      
-                        	bugReporter.reportBug(new BugInstance(this, INSTALL_ARBITRARY_APK, Priorities.LOW_PRIORITY) 
-                                    .addClass(classContext.getJavaClass()).addMethod(classContext.getJavaClass(), m));
+                if (("createPackageContext".equals(invoke.getMethodName(cpg)))) {
+                	isContextCreated = true;
+                } else if ("getClassLoader".equals(invoke.getMethodName(cpg)) && "()Landroid/content/Intent;".equals(invoke.getSignature(cpg))) {
+                	isClassLoadCalled = true;
+                } else {
+                	if (invoke.getClassName(cpg) != null) {
+                        String className = invoke.getClassName(cpg);
+                        className.replace("/", ".");
+                        if (!className.startsWith("android") && !className.startsWith("kotlin")) {
+    		                JavaClass clazz = Repository.lookupClass(className);
+    		                isVulnerable(invoke.getMethodName(cpg), clazz);
                         }
                     }
                 }
@@ -88,19 +100,26 @@ public class InstallApk implements Detector {
                     className.replace("/", ".");
                     if (!className.startsWith("android") && !className.startsWith("kotlin")) {
 		                JavaClass clazz = Repository.lookupClass(className);
-		                isSharedPrefsMethod(invoke.getMethodName(cpg), clazz);
-                    	}
+		                isVulnerable(invoke.getMethodName(cpg), clazz);
+                    }
                 }
             }
         }
+        
+        if (isContextCreated && isClassLoadCalled) {
+        	bugReporter.reportBug(new BugInstance(this, CREATES_UNSAFE_PACKAGE_CONTEXT, Priorities.HIGH_PRIORITY) 
+                    .addClass(classContext.getJavaClass()).addMethod(classContext.getJavaClass(), m));
+        } else if (isContextCreated) {
+        	bugReporter.reportBug(new BugInstance(this, CREATES_UNSAFE_PACKAGE_CONTEXT, Priorities.NORMAL_PRIORITY) 
+                    .addClass(classContext.getJavaClass()).addMethod(classContext.getJavaClass(), m));
+        }
     }
-    
-    private void isSharedPrefsMethod(String me, JavaClass clazz) throws CFGBuilderException, DataflowAnalysisException, ClassNotFoundException {
-    	if (!clazz.toString().contains("com.tmh")) {
+
+	private void isVulnerable(String me, JavaClass clazz) throws ClassNotFoundException {
+		if (!clazz.toString().contains("com.tmh")) {
     		return;
     	}
-    	System.out.println("Now looking for method " + me + " in " + clazz.toString().split("\n")[0]);
-    	ConstantPool constantPool = clazz.getConstantPool();
+		ConstantPool constantPool = clazz.getConstantPool();
         Method [] method=clazz.getMethods();
         
         ConstantPoolGen cpg = new ConstantPoolGen(constantPool);
@@ -112,18 +131,24 @@ public class InstallApk implements Detector {
 	            for(InstructionHandle ih = mg.getInstructionList().getStart(); 
 	                    ih != null; ih = ih.getNext())
 	            {
-	            	if (ih.getInstruction() instanceof INVOKEVIRTUAL) {
-	                    InvokeInstruction invoke = (InvokeInstruction) ih.getInstruction();
+	                if(ih.getInstruction() instanceof INVOKEVIRTUAL) 
+	                {
+	                	InvokeInstruction invoke = (InvokeInstruction) ih.getInstruction();
 	                    
-	                    if ("setDataAndType".equals(invoke.getMethodName(cpg)) || "setType".equals(invoke.getMethodName(cpg))) {
-	                    	LDC loadConst = ByteCode.getPrevInstruction(ih, LDC.class);
-	                        if (loadConst != null) {
-	                            if ("application/vnd.android.package-archive".equals(loadConst.getValue(cpg))){                      
-	                            	bugReporter.reportBug(new BugInstance(this, INSTALL_ARBITRARY_APK, Priorities.LOW_PRIORITY) 
-	                                        .addClass(this.originalJc).addMethod(this.originalJc, this.originalMethod));
+	                	if (("createPackageContext".equals(invoke.getMethodName(cpg)))) {
+	                    	isContextCreated = true;
+	                    } else if ("getClassLoader".equals(invoke.getMethodName(cpg)) && "()Landroid/content/Intent;".equals(invoke.getSignature(cpg))) {
+	                    	isClassLoadCalled = true;
+	                    } else {
+	                    	if (invoke.getClassName(cpg) != null) {
+	                            String className = invoke.getClassName(cpg);
+	                            className.replace("/", ".");
+	                            if (!className.startsWith("android") && !className.startsWith("kotlin")) {
+	        		                JavaClass cl = Repository.lookupClass(className);
+	        		                isVulnerable(invoke.getMethodName(cpg), cl);
 	                            }
 	                        }
-	                    }
+	                    } 
 	                } else if (ih.getInstruction() instanceof INVOKESTATIC) {
 	                	InvokeInstruction invoke = (InvokeInstruction) ih.getInstruction();
 	                	if (invoke.getClassName(cpg) != null) {
@@ -131,14 +156,14 @@ public class InstallApk implements Detector {
 	                       	className.replace("/", ".");
 	                       	if (!className.startsWith("android") && !className.startsWith("kotlin") && !className.startsWith("java")) {
 	    		               	JavaClass cl = Repository.lookupClass(className);
-	    		               	isSharedPrefsMethod(invoke.getMethodName(cpg), cl);
-	                       	}     
+	    		               	isVulnerable(invoke.getMethodName(cpg), cl);
+	                       	}  
 	                	}
 	                }
 	            }
         	}
         }
-    }
+	}
 
 	@Override
 	public void report() {

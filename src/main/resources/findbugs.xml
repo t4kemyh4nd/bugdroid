@@ -13,6 +13,7 @@
         <Detector class="com.tmh.bugdroid.arbitraryaccess.ContentProviderAccess" reports="CONTENT_PROVIDER_ACCESS" ></Detector>
         <Detector class="com.tmh.bugdroid.arbitraryaccess.InstallApk" reports="INSTALL_ARBITRARY_APK" ></Detector>      
         <Detector class="com.tmh.bugdroid.arbitraryaccess.SharedPrefs" reports="SHARED_PREFS_READ" ></Detector>      
+        <Detector class="com.tmh.bugdroid.arbitraryaccess.CodeExecution" reports="CREATES_PACKAGE_CONTEXT" ></Detector>      
    
 	<BugPattern abbrev="BDJSE" category="SECURITY" type="WEB_VIEW_JAVASCRIPT_ENABLED" />
 	<BugPattern abbrev="BDFA" category="SECURITY" type="WEBVIEW_UNIVERSAL_FILE_ACCESS" />
@@ -21,7 +22,10 @@
 	<BugPattern abbrev="BDRR" category="SECURITY" type="RECEIVER_REGISTERED" />
 	<BugPattern abbrev="BDBS" category="SECURITY" type="BROADCAST_SENT" />
 	<BugPattern abbrev="BDFI" category="SECURITY" type="INTERCEPT_FILE_INTENT" />
+	<BugPattern abbrev="BDCPA" category="SECURITY" type="CONTENT_PROVIDER_ACCESS" />
 	<BugPattern abbrev="BDIA" category="SECURITY" type="INSTALL_ARBITRARY_APK" />
 	<BugPattern abbrev="BDSPR" category="SECURITY" type="SHARED_PREFS_READ" />
+	<BugPattern abbrev="BDCPC" category="SECURITY" type="CREATES_PACKAGE_CONTEXT" />
+	
 	
 </FindbugsPlugin>

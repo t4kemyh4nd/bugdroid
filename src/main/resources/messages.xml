@@ -131,4 +131,15 @@ Enabling JavaScript is not a bad practice. It just means that the backend code n
   	<Details><![CDATA[Application calls SharedPreferences.getString() with user input.]]></Details></BugPattern>
 
   <BugCode abbrev="BDSPR">The application allows arbitrary reading of shared preferences.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.arbitraryaccess.CodeExecution">
+  	<Details>Detector to check for dynamic creation of package contexts..</Details>
+   </Detector>
+
+  <BugPattern type="CREATES_UNSAFE_PACKAGE_CONTEXT">
+  	<ShortDescription>The application creates a package context dynamically.</ShortDescription>
+  	<LongDescription>Application creates package context. Check further for misconfigurations if parameters can be controlled.</LongDescription>
+  	<Details><![CDATA[Application calls createPackageContext().]]></Details></BugPattern>
+
+  <BugCode abbrev="BDCPC">The application creates a package context dynamically.</BugCode>
 </MessageCollection>

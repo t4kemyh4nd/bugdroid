@@ -60,7 +60,7 @@ public class ContentProviderAccess implements Detector {
             
             if (inst instanceof INVOKEVIRTUAL) {
                 InvokeInstruction invoke = (InvokeInstruction) inst;
-                if ("setResult".equals(invoke.getMethodName(cpg)) && "(ILandroid/content/Intent;)V".equals(invoke.getSignature(cpg))) {
+                if (("setResult".equals(invoke.getMethodName(cpg)) && "(ILandroid/content/Intent;)V".equals(invoke.getSignature(cpg))) || ("startActivityForResult".equals(invoke.getMethodName(cpg)))) {
                 	isSetResultWithIntent = true;
                 } else if ("getIntent".equals(invoke.getMethodName(cpg)) && "()Landroid/content/Intent;".equals(invoke.getSignature(cpg))) {
                 	isGetIntentCalled = true;
