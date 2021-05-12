@@ -63,7 +63,6 @@ public class SharedPrefs implements Detector {
     	if (!classContext.getJavaClass().toString().contains("com.tmh")) {
     		return;
     	}
-    	System.out.println("Now inside parent method: " + m);
     	this.originalMethod = m;
         MethodGen methodGen = classContext.getMethodGen(m);
         ConstantPoolGen cpg = classContext.getConstantPoolGen();
@@ -115,7 +114,6 @@ public class SharedPrefs implements Detector {
     	if (!clazz.toString().contains("com.tmh")) {
     		return;
     	}
-    	System.out.println("Now looking for method " + me + " in " + clazz.toString().split("\n")[0]);
     	ConstantPool constantPool = clazz.getConstantPool();
         Method [] method=clazz.getMethods();
         
@@ -123,7 +121,6 @@ public class SharedPrefs implements Detector {
         for(Method m : method)
         {
         	if (m.getName().contains(me)) {
-        		System.out.println("Now scanning " + m.getName());
 	            MethodGen mg = new MethodGen(m, m.getName(), cpg);
 	            for(InstructionHandle ih = mg.getInstructionList().getStart(); 
 	                    ih != null; ih = ih.getNext())

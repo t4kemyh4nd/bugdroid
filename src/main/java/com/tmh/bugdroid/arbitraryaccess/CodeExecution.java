@@ -58,6 +58,8 @@ public class CodeExecution implements Detector {
     }
 
     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException, ClassNotFoundException {
+    	this.isClassLoadCalled = false;
+    	this.isContextCreated = false;
     	if (!classContext.getJavaClass().toString().contains("com.tmh")) {
     		return;
     	}
@@ -116,6 +118,8 @@ public class CodeExecution implements Detector {
     }
 
 	private void isVulnerable(String me, JavaClass clazz) throws ClassNotFoundException {
+    	System.out.println("Now looking for method " + me + " in " + clazz.toString().split("\n")[0]);
+
 		if (!clazz.toString().contains("com.tmh")) {
     		return;
     	}
@@ -157,11 +161,18 @@ public class CodeExecution implements Detector {
 	                       	if (!className.startsWith("android") && !className.startsWith("kotlin") && !className.startsWith("java")) {
 	    		               	JavaClass cl = Repository.lookupClass(className);
 	    		               	isVulnerable(invoke.getMethodName(cpg), cl);
-	                       	}  
+	                       	}
 	                	}
 	                }
 	            }
         	}
+        	if (isContextCreated && isClassLoadCalled) {
+            	bugReporter.reportBug(new BugInstance(this, CREATES_UNSAFE_PACKAGE_CONTEXT, Priorities.HIGH_PRIORITY) 
+                        .addClass(this.originalJc).addMethod(this.originalJc, this.originalMethod));
+            } else if (isContextCreated) {
+            	bugReporter.reportBug(new BugInstance(this, CREATES_UNSAFE_PACKAGE_CONTEXT, Priorities.NORMAL_PRIORITY) 
+                        .addClass(this.originalJc).addMethod(this.originalJc, this.originalMethod));
+            }
         }
 	}
 
