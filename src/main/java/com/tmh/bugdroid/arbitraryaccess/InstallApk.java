@@ -85,9 +85,8 @@ public class InstallApk implements Detector {
             	InvokeInstruction invoke = (InvokeInstruction) inst;
             	if (invoke.getClassName(cpg) != null) {
                     String className = invoke.getClassName(cpg);
-                    className.replace("/", ".");
                     if (!className.startsWith("android") && !className.startsWith("kotlin")) {
-		                JavaClass clazz = Repository.lookupClass(className);
+		                JavaClass clazz = Repository.lookupClass(className.replace("/", "."));
 		                isSharedPrefsMethod(invoke.getMethodName(cpg), clazz);
                     	}
                 }
@@ -130,7 +129,7 @@ public class InstallApk implements Detector {
 	                        String className = invoke.getClassName(cpg);
 	                       	className.replace("/", ".");
 	                       	if (!className.startsWith("android") && !className.startsWith("kotlin") && !className.startsWith("java")) {
-	    		               	JavaClass cl = Repository.lookupClass(className);
+	    		               	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 	    		               	isSharedPrefsMethod(invoke.getMethodName(cpg), cl);
 	                       	}     
 	                	}

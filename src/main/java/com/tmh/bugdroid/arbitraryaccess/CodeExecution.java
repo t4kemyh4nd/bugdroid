@@ -90,7 +90,7 @@ public class CodeExecution implements Detector {
                         String className = invoke.getClassName(cpg);
                         className.replace("/", ".");
                         if (!className.startsWith("android") && !className.startsWith("kotlin")) {
-    		                JavaClass clazz = Repository.lookupClass(className);
+    		                JavaClass clazz = Repository.lookupClass(className.replace("/", "."));
     		                isVulnerable(invoke.getMethodName(cpg), clazz);
                         }
                     }
@@ -101,7 +101,7 @@ public class CodeExecution implements Detector {
                     String className = invoke.getClassName(cpg);
                     className.replace("/", ".");
                     if (!className.startsWith("android") && !className.startsWith("kotlin")) {
-		                JavaClass clazz = Repository.lookupClass(className);
+		                JavaClass clazz = Repository.lookupClass(className.replace("/", "."));
 		                isVulnerable(invoke.getMethodName(cpg), clazz);
                     }
                 }
@@ -145,7 +145,7 @@ public class CodeExecution implements Detector {
 	                            String className = invoke.getClassName(cpg);
 	                            className.replace("/", ".");
 	                            if (!className.startsWith("android") && !className.startsWith("kotlin")) {
-	        		                JavaClass cl = Repository.lookupClass(className);
+	        		                JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 	        		                isVulnerable(invoke.getMethodName(cpg), cl);
 	                            }
 	                        }
@@ -156,7 +156,7 @@ public class CodeExecution implements Detector {
 	                        String className = invoke.getClassName(cpg);
 	                       	className.replace("/", ".");
 	                       	if (!className.startsWith("android") && !className.startsWith("kotlin") && !className.startsWith("java")) {
-	    		               	JavaClass cl = Repository.lookupClass(className);
+	    		               	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 	    		               	isVulnerable(invoke.getMethodName(cpg), cl);
 	                       	}
 	                	}

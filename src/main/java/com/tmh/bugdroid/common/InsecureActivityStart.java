@@ -101,7 +101,7 @@ public class InsecureActivityStart implements Detector {
             	if (isNewIntent = true) {
                     InvokeInstruction invoke = (InvokeInstruction) inst;     
                 	//System.out.println(inst.toString() + " " + invoke.getClassName(cpg) + " " + invoke.getMethodName(cpg));
-                    if (invoke.getClassName(cpg) == "android.content.Intent") {
+                    if (invoke.getClassName(cpg).equals("android.content.Intent")) {
 	            		if (invoke.getMethodName(cpg).equals("setClassName") || invoke.getMethodName(cpg).equals("setClass") || invoke.getMethodName(cpg).equals("setComponentName")) {
 	            			isPackageSet = true;
 	            		}
@@ -112,7 +112,7 @@ public class InsecureActivityStart implements Detector {
                     		invoke.getSignature(cpg).contains("android/content/Intent")) {
                     	String className = invoke.getClassName(cpg);
                        	className.replace("/", ".");
-                    	JavaClass cl = Repository.lookupClass(className);
+                    	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 		               	isVulnerable(invoke.getMethodName(cpg), cl);
                     }
             	}
@@ -123,7 +123,7 @@ public class InsecureActivityStart implements Detector {
                     		invoke.getSignature(cpg).contains("android/content/Intent")) {
             			String className = invoke.getClassName(cpg);
                        	className.replace("/", ".");
-                    	JavaClass cl = Repository.lookupClass(className);
+                    	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 		               	isVulnerable(invoke.getMethodName(cpg), cl);
             		}
             	}
@@ -165,7 +165,7 @@ public class InsecureActivityStart implements Detector {
 	                        		invoke.getSignature(cpg).contains("android/content/Intent")) {
 	                        	String className = invoke.getClassName(cpg);
 	                           	className.replace("/", ".");
-	                        	JavaClass cl = Repository.lookupClass(className);
+	                        	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 	    		               	isVulnerable(invoke.getMethodName(cpg), cl);
 	                        }
 	                	}
@@ -176,7 +176,7 @@ public class InsecureActivityStart implements Detector {
 	                        		invoke.getSignature(cpg).contains("android/content/Intent")) {
 	                			String className = invoke.getClassName(cpg);
 	                           	className.replace("/", ".");
-	                        	JavaClass cl = Repository.lookupClass(className);
+	                        	JavaClass cl = Repository.lookupClass(className.replace("/", "."));
 	    		               	isVulnerable(invoke.getMethodName(cpg), cl);
 	                		}
 	                	}
