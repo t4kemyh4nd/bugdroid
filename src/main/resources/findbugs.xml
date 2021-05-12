@@ -15,6 +15,7 @@
         <Detector class="com.tmh.bugdroid.arbitraryaccess.SharedPrefs" reports="SHARED_PREFS_READ" ></Detector>      
         <Detector class="com.tmh.bugdroid.arbitraryaccess.CodeExecution" reports="CREATES_UNSAFE_PACKAGE_CONTEXT" ></Detector>   
         <Detector class="com.tmh.bugdroid.arbitraryaccess.ArbitraryComponents" reports="ARBITRARY_COMPONENTS_ACCESS" ></Detector>   
+        <Detector class="com.tmh.bugdroid.common.InsecureActivityStart" reports="INSECURE_ACTIVITY_START" ></Detector>   
    
 	<BugPattern abbrev="BDJSE" category="SECURITY" type="WEB_VIEW_JAVASCRIPT_ENABLED" />
 	<BugPattern abbrev="BDFA" category="SECURITY" type="WEBVIEW_UNIVERSAL_FILE_ACCESS" />
@@ -28,5 +29,6 @@
 	<BugPattern abbrev="BDSPR" category="SECURITY" type="SHARED_PREFS_READ" />
 	<BugPattern abbrev="BDCPC" category="SECURITY" type="CREATES_UNSAFE_PACKAGE_CONTEXT" />
 	<BugPattern abbrev="BDACA" category="SECURITY" type="ARBITRARY_COMPONENTS_ACCESS" />
+	<BugPattern abbrev="BDIAS" category="SECURITY" type="INSECURE_ACTIVITY_START" />
 
 </FindbugsPlugin>

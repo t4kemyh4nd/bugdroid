@@ -118,8 +118,6 @@ public class CodeExecution implements Detector {
     }
 
 	private void isVulnerable(String me, JavaClass clazz) throws ClassNotFoundException {
-    	System.out.println("Now looking for method " + me + " in " + clazz.toString().split("\n")[0]);
-
 		if (!clazz.toString().contains("com.tmh")) {
     		return;
     	}
@@ -130,7 +128,6 @@ public class CodeExecution implements Detector {
         for(Method m : method)
         {
         	if (m.getName().contains(me)) {
-        		System.out.println("Now scanning " + m.getName());
 	            MethodGen mg = new MethodGen(m, m.getName(), cpg);
 	            for(InstructionHandle ih = mg.getInstructionList().getStart(); 
 	                    ih != null; ih = ih.getNext())

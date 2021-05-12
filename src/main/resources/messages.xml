@@ -153,4 +153,15 @@ Enabling JavaScript is not a bad practice. It just means that the backend code n
   	<Details><![CDATA[Application calls (Intent) intent.getParcelableExtra().]]></Details></BugPattern>
 
   <BugCode abbrev="BDACA">The application processes an intent from an incoming intent.</BugCode>
+  
+  <Detector class="com.tmh.bugdroid.common.InsecureActivityStart">
+  	<Details>Detector to check for code that declares an intent without explicitly setting a component or class name.</Details>
+   </Detector>
+
+  <BugPattern type="INSECURE_ACTIVITY_START">
+  	<ShortDescription>The application creates an implicit intent.</ShortDescription>
+  	<LongDescription>Application creates an intent that may be readable by malicious applications. Review further for misconfigurations.</LongDescription>
+  	<Details><![CDATA[Application creates Intent without .setClassName() or .setComponentName().]]></Details></BugPattern>
+
+  <BugCode abbrev="BDIAS">The application creates an implicit intent</BugCode>
 </MessageCollection>
